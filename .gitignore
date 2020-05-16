@@ -1,0 +1,9 @@
+
+# python cache
+__pycache__/
+
+# test video
+20200516.small.mp4
+
+# vscode
+settings.json
