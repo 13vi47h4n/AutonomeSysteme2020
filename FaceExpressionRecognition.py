@@ -4,11 +4,16 @@ import numpy as np
 import sys
 import time
 import itertools
-import resnet
+from resnet import ResNetModel
 
 # global variables
 fps_constant = 20
-process_Nth_frame = 1
+process_Nth_frame = 10
+scale_factor = 4
+resize_factor = 1
+
+# initialize face expression recognition
+face_exp_rec = ResNetModel(size=int(224/resize_factor))
 
 # init camera
 if (len(sys.argv) > 1):
@@ -42,7 +47,8 @@ while True:
     ret, frame = video_capture.read()
     # face recognition
     if frame_number % process_Nth_frame == 0:
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        small_framme = cv2.resize(frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
+        rgb_frame = cv2.cvtColor(small_framme, cv2.COLOR_BGR2GRAY)
         face_locations = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
         print("Time Face Recognition: {:.2f}".format(time_after_face_rec - time_at_start))
@@ -51,8 +57,8 @@ while True:
         face_expressions = []
         for (top, right, bottom, left) in face_locations:
             # Magic Face Expression Recognition
-            face_image = frame[top:bottom, left:right]
-            face_exp = resnet.face_expression(face_image)
+            face_image = frame[top*scale_factor:bottom*scale_factor, left*scale_factor:right*scale_factor]
+            face_exp = face_exp_rec.face_expression(face_image)
             face_expressions.append(face_exp[0])
         
         time_after_expr_rec = time.time()
@@ -62,6 +68,10 @@ while True:
 
     # graphical output face expression recognition
     for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):
+        top *= scale_factor
+        right *= scale_factor
+        bottom *= scale_factor
+        left *= scale_factor
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
         cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0,0,255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX

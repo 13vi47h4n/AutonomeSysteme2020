@@ -9,57 +9,57 @@ import torchvision
 from torchvision import datasets, models, transforms
 import cv2
 
-__all__ = ['ResNet']
+class ResNetModel:
 
-dictionary = {
-     "Contempt":7,
-     "Anger":6,
-     "Disgust":5,
-     "Fear":4,
-     "Surprise":3,
-     "Sadness":2,
-     "Happiness":1,
-     "Neutral": 0,
-}
+    dictionary = {
+        "Contempt":7,
+        "Anger":6,
+        "Disgust":5,
+        "Fear":4,
+        "Surprise":3,
+        "Sadness":2,
+        "Happiness":1,
+        "Neutral": 0,
+    }
 
-label_map = dict((v,k) for k, v in dictionary.items())
+    def __init__(self, size=224):
+        resnet50_model = ResNet('resnet50')
+        PATH = './best.pth'
+        if torch.cuda.is_available():
+            checkpoint = torch.load(PATH)
+        else:
+            checkpoint = torch.load(PATH, map_location="cpu")
+        
+        resnet50_model.load_state_dict(checkpoint['model_state_dict'])
+        resnet50_model.eval()
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.resnet50_model = resnet50_model.to(self.device)
 
-def image_loader(image):
-    """load image, returns cuda tensor"""
-    #image = Image.open(image)
-    #image = cv2.resize(image, (224, 224)) 
-    loader = transforms.Compose([ transforms.ToTensor()])
-    image = loader(image).float()
-    image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
-    return image  #assumes that you're using GPU
+        self.label_map = dict((v,k) for k, v in self.dictionary.items())
+        self.size = size
 
-def resize_image(image):
-    image = cv2.resize(image, (224, 224)) 
-    return image
+    def image_loader(self, image):
+        loader = transforms.Compose([ transforms.ToTensor()])
+        image = loader(image).float()
+        image = image.unsqueeze(0)
+        return image
 
-def face_expression(image):  
-    resnet50_model = ResNet('resnet50')
-    PATH = './best.pth'
-    if torch.cuda.is_available():
-        checkpoint = torch.load(PATH)
-    else:
-        checkpoint = torch.load(PATH, map_location="cpu")
-    
-    resnet50_model.load_state_dict(checkpoint['model_state_dict'])
-    resnet50_model.eval()
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    resnet50_model = resnet50_model.to(device)
-    image = resize_image(image)
-    image = image_loader(image)
-    image = image.to(device)
-    input_image = {"image": image}
-    with torch.no_grad():
-        face_expressions = []
-        outputs = resnet50_model.forward(input_image)
-        _, predicted = torch.max(outputs, 1)
-        idx = predicted.item()
-        face_expressions.append(label_map[idx])
-        return face_expressions
+    def resize_image(self, image):
+        image = cv2.resize(image, (self.size, self.size)) 
+        return image
+
+    def face_expression(self, image):  
+        image = self.resize_image(image)
+        image = self.image_loader(image)
+        image = image.to(self.device)
+        input_image = {"image": image}
+        with torch.no_grad():
+            face_expressions = []
+            outputs = self.resnet50_model.forward(input_image)
+            _, predicted = torch.max(outputs, 1)
+            idx = predicted.item()
+            face_expressions.append(self.label_map[idx])
+            return face_expressions
 
 class ResNet(nn.Module):
 
