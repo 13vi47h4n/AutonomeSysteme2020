@@ -10,9 +10,6 @@ import resnet
 fps_constant = 20
 process_Nth_frame = 1
 
-# TODO: init expression face recognition and model 
-
-
 # init camera
 if (len(sys.argv) > 1):
     video_input = sys.argv[1]

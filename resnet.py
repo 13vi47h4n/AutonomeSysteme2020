@@ -1,6 +1,6 @@
 # This implementation is based on the ResNet implementation in torchvision
 # https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
-from __future__ import print_function, division
+
 import torch
 import torch.nn as nn
 import torchvision.models as models
@@ -8,7 +8,6 @@ import torchvision.transforms as transforms
 import torchvision
 from torchvision import datasets, models, transforms
 import cv2
-import torchvision.transforms as T
 
 __all__ = ['ResNet']
 
@@ -34,7 +33,7 @@ def image_loader(image):
     image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
     return image  #assumes that you're using GPU
 
-def crop_image(image):
+def resize_image(image):
     image = cv2.resize(image, (224, 224)) 
     return image
 
@@ -48,10 +47,11 @@ def face_expression(image):
     
     resnet50_model.load_state_dict(checkpoint['model_state_dict'])
     resnet50_model.eval()
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    # resnet50_model = resnet50_model.to(device)
-    image = crop_image(image)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    resnet50_model = resnet50_model.to(device)
+    image = resize_image(image)
     image = image_loader(image)
+    image = image.to(device)
     input_image = {"image": image}
     with torch.no_grad():
         face_expressions = []
