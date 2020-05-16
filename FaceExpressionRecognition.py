@@ -8,12 +8,12 @@ from resnet import ResNetModel
 
 # global variables
 fps_constant = 10
-process_Nth_frame = 1
-scale_factor = 2
+process_Nth_frame = 4
+scale_factor = 3
 resize_factor = 1
 
 # initialize face expression recognition
-face_exp_rec = ResNetModel(size=int(224/resize_factor))
+face_exp_rec = ResNetModel(size=int(224/resize_factor), mode="gpu")
 
 # init camera
 if (len(sys.argv) > 1):
@@ -45,6 +45,10 @@ while True:
         start_time_current = time.time()
 
     ret, frame = video_capture.read()
+    if not ret:
+        print("End of input")
+        break
+
     # face recognition
     if frame_number % process_Nth_frame == 0:
         small_framme = cv2.resize(frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
@@ -58,12 +62,15 @@ while True:
         for (top, right, bottom, left) in face_locations:
             # Magic Face Expression Recognition
             face_image = frame[top*scale_factor:bottom*scale_factor, left*scale_factor:right*scale_factor]
-            face_image = cv2.cvtColor(small_framme, cv2.COLOR_BGR2RGB)
+            face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_exp = face_exp_rec.face_expression(face_image)
-            face_expressions.append(face_exp[0])
+            face_expressions.append(face_exp)
         
         time_after_expr_rec = time.time()
-        print("Time Face Expression Recognition: {:.2f}".format(time_after_expr_rec - time_after_face_rec))
+        if len(face_expressions) > 0:
+            print("Time Face Expression Recognition: {:.2f}".format(time_after_expr_rec - time_after_face_rec))
+    else:
+        cv2.waitKey(33)
 
     frame_number += 1
 
@@ -74,9 +81,9 @@ while True:
         bottom *= scale_factor
         left *= scale_factor
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-        cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0,0,255), cv2.FILLED)
+        cv2.rectangle(frame, (left, bottom), (right, bottom + 25), (0,0,255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, face_expression, (left + 6, bottom -6), font, 1, (255, 255, 255), 1)
+        cv2.putText(frame, face_expression, (left + 6, bottom + 18), font, 0.8, (255, 255, 255), 1)
 
     # graphical output stats
     fps = fps_constant / (start_time_current - start_time_old)

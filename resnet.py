@@ -22,17 +22,20 @@ class ResNetModel:
         "Neutral": 0,
     }
 
-    def __init__(self, size=224):
+    def __init__(self, size=224, mode='gpu'):
         resnet50_model = ResNet('resnet50')
         PATH = './best.pth'
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and mode == 'gpu':
             checkpoint = torch.load(PATH)
         else:
             checkpoint = torch.load(PATH, map_location="cpu")
-        
+
         resnet50_model.load_state_dict(checkpoint['model_state_dict'])
         resnet50_model.eval()
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if mode == 'gpu':
+            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = torch.device("cpu")
         self.resnet50_model = resnet50_model.to(self.device)
 
         self.label_map = dict((v,k) for k, v in self.dictionary.items())
@@ -54,12 +57,11 @@ class ResNetModel:
         image = image.to(self.device)
         input_image = {"image": image}
         with torch.no_grad():
-            face_expressions = []
             outputs = self.resnet50_model.forward(input_image)
             _, predicted = torch.max(outputs, 1)
             idx = predicted.item()
-            face_expressions.append(self.label_map[idx])
-            return face_expressions
+            face_expression = self.label_map[idx]
+            return face_expression
 
 class ResNet(nn.Module):
 
