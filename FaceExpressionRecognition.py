@@ -7,9 +7,9 @@ import itertools
 from resnet import ResNetModel
 
 # global variables
-fps_constant = 20
-process_Nth_frame = 10
-scale_factor = 4
+fps_constant = 10
+process_Nth_frame = 1
+scale_factor = 2
 resize_factor = 1
 
 # initialize face expression recognition
@@ -48,7 +48,7 @@ while True:
     # face recognition
     if frame_number % process_Nth_frame == 0:
         small_framme = cv2.resize(frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
-        rgb_frame = cv2.cvtColor(small_framme, cv2.COLOR_BGR2GRAY)
+        rgb_frame = cv2.cvtColor(small_framme, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
         print("Time Face Recognition: {:.2f}".format(time_after_face_rec - time_at_start))
@@ -58,6 +58,7 @@ while True:
         for (top, right, bottom, left) in face_locations:
             # Magic Face Expression Recognition
             face_image = frame[top*scale_factor:bottom*scale_factor, left*scale_factor:right*scale_factor]
+            face_image = cv2.cvtColor(small_framme, cv2.COLOR_BGR2RGB)
             face_exp = face_exp_rec.face_expression(face_image)
             face_expressions.append(face_exp[0])
         
