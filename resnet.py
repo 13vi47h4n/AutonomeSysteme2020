@@ -52,10 +52,10 @@ class ResNetModel:
         return image
 
     def face_expression(self, image):  
-        image = self.resize_image(image)
-        image = self.image_loader(image)
-        image = image.to(self.device)
-        input_image = {"image": image}
+        resized_image = self.resize_image(image)
+        tensor_image = self.image_loader(resized_image)
+        tensor_image = tensor_image.to(self.device)
+        input_image = {"image": tensor_image}
         with torch.no_grad():
             outputs = self.resnet50_model.forward(input_image)
             _, predicted = torch.max(outputs, 1)
@@ -78,7 +78,5 @@ class ResNet(nn.Module):
             raise NotImplementedError("Resnet to be implemented:", arch)
 
     def forward(self, input_dict):
-
         cls = self.model(input_dict["image"])
-
         return cls
