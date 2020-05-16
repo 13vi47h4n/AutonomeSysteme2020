@@ -1,0 +1,7 @@
+requirements:
+
+pytorch v1.5
+torchvision 0.6.0
+opencv2
+numpy
+face_recogniton (pip install face_recognition)
