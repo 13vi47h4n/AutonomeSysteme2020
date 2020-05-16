@@ -35,25 +35,31 @@ cropped = 0
 start_time_current = time.time()
 start_time_old = time.time()
 while True:
+    time_at_start = time.time()
+    print("Frame: {}".format(frame_number))
     # set timers for FPS calculation
     if frame_number % fps_constant == 0:
         start_time_old = start_time_current
         start_time_current = time.time()
 
-    
     ret, frame = video_capture.read()
     # face recognition
     if frame_number % process_Nth_frame == 0:
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         face_locations = face_recognition.face_locations(rgb_frame)
+        time_after_face_rec = time.time()
+        print("Time Face Recognition: {:.2f}".format(time_after_face_rec - time_at_start))
 
         # face expression recognition
         face_expressions = []
         for (top, right, bottom, left) in face_locations:
-                # Magic Face Expression Recognition
-                face_image = frame[top:bottom, left:right]
-                face_exp = resnet.face_expression(face_image)
-                face_expressions.append(face_exp[0])
+            # Magic Face Expression Recognition
+            face_image = frame[top:bottom, left:right]
+            face_exp = resnet.face_expression(face_image)
+            face_expressions.append(face_exp[0])
+        
+        time_after_expr_rec = time.time()
+        print("Time Face Expression Recognition: {:.2f}".format(time_after_expr_rec - time_after_face_rec))
 
     frame_number += 1
 
@@ -70,6 +76,7 @@ while True:
     cv2.rectangle(frame, (0,0), (300, 25), (255,0,0), cv2.FILLED)
     font = cv2.FONT_HERSHEY_DUPLEX
     cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
+    print("Output formatting: {:.2f}".format(time.time() - time_after_expr_rec))
 
     # display resulting image
     cv2.namedWindow('Video', cv2.WINDOW_NORMAL)

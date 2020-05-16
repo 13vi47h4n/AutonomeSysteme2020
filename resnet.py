@@ -48,8 +48,8 @@ def face_expression(image):
     
     resnet50_model.load_state_dict(checkpoint['model_state_dict'])
     resnet50_model.eval()
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    resnet50_model = resnet50_model.to(device)
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # resnet50_model = resnet50_model.to(device)
     image = crop_image(image)
     image = image_loader(image)
     input_image = {"image": image}
