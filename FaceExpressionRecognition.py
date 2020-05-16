@@ -4,9 +4,11 @@ import numpy as np
 import sys
 import time
 import itertools
+import resnet
 
 # global variables
 fps_constant = 20
+process_Nth_frame = 1
 
 # TODO: init expression face recognition and model 
 
@@ -21,7 +23,9 @@ try:
     video_input = int(video_input)
 except:
     pass
+
 video_capture = cv2.VideoCapture(video_input)
+video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 # init some variables
 frame_number = 0
@@ -39,15 +43,18 @@ while True:
     
     ret, frame = video_capture.read()
     # face recognition
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    face_locations = face_recognition.face_locations(rgb_frame)
+    if frame_number % process_Nth_frame == 0:
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        face_locations = face_recognition.face_locations(rgb_frame)
 
-    # face expression recognition
-    face_expressions = []
-    for (top, right, bottom, left) in face_locations:
-            # TODO: Magic Face Expression Recognition
-            # face_expressions.append(<string>)
-            pass
+        # face expression recognition
+        face_expressions = []
+        for (top, right, bottom, left) in face_locations:
+                # Magic Face Expression Recognition
+                face_image = frame[top:bottom, left:right]
+                face_exp = resnet.face_expression(face_image)
+                face_expressions.append(face_exp[0])
+
     frame_number += 1
 
     # graphical output face expression recognition

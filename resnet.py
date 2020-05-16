@@ -1,13 +1,12 @@
 # This implementation is based on the ResNet implementation in torchvision
 # https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
+from __future__ import print_function, division
 import torch
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
-from __future__ import print_function, division
 import torchvision
 from torchvision import datasets, models, transforms
-import matplotlib.pyplot as plt
 import cv2
 import torchvision.transforms as T
 
@@ -39,15 +38,18 @@ def crop_image(image):
     image = cv2.resize(image, (224, 224)) 
     return image
 
-def face_expression(image_path):  
-    image = cv2.imread(path)
+def face_expression(image):  
     resnet50_model = ResNet('resnet50')
     PATH = './best.pth'
-    checkpoint = torch.load(PATH)
+    if torch.cuda.is_available():
+        checkpoint = torch.load(PATH)
+    else:
+        checkpoint = torch.load(PATH, map_location="cpu")
+    
     resnet50_model.load_state_dict(checkpoint['model_state_dict'])
     resnet50_model.eval()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    #resnet50_model = resnet50_model.to(device)
+    resnet50_model = resnet50_model.to(device)
     image = crop_image(image)
     image = image_loader(image)
     input_image = {"image": image}
@@ -57,7 +59,6 @@ def face_expression(image_path):
         _, predicted = torch.max(outputs, 1)
         idx = predicted.item()
         face_expressions.append(label_map[idx])
-        print(face_expressions)
         return face_expressions
 
 class ResNet(nn.Module):
