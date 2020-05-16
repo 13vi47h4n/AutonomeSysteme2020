@@ -3,12 +3,9 @@ import os.path
 
 class TextExport:
 
-    path = ""
-    file = None
     number = 1
 
     def __init__(self, pathAndFileName):
-        path = pathAndFileName
         if os.path.isfile(pathAndFileName):
             self.file = open(pathAndFileName, "a+");
         else:

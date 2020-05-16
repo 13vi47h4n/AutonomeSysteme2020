@@ -5,6 +5,7 @@ import sys
 import time
 import itertools
 from resnet import ResNetModel
+from TextExport import TextExport
 
 # global variables
 fps_constant = 10
@@ -14,6 +15,12 @@ resize_factor = 1
 
 # initialize face expression recognition
 face_exp_rec = ResNetModel(size=int(224/resize_factor), mode="gpu")
+
+# initialize logger
+if (len(sys.argv) > 2):
+    export = TextExport(sys.argv[2])
+else:
+    export = TextExport("output.yml")
 
 # init camera
 if (len(sys.argv) > 1):
@@ -103,6 +110,12 @@ while True:
     # display resulting image
     cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
     cv2.imshow('Video', frame)
+
+    # log when 'l' is being pressed
+    if cv2.waitKey(1) & 0xFF == ord('l'):
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):
+            export.append(frame_number, (top, left),
+                          (right, bottom), face_expression)
 
     # break when 'q' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
