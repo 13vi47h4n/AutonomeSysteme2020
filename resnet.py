@@ -46,25 +46,6 @@ def image_loader(image_name):
     image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
     return image  #assumes that you're using GPU
 
-class ResNet(nn.Module):
-
-    def __init__(
-        self, arch, pretrained=False, progress=False, num_cls=8, **kwargs
-    ):
-        super().__init__()
-
-        if(arch == 'resnet18'):
-            self.model = torchvision.models.resnet18(num_classes=num_cls)
-        elif(arch == 'resnet50'):
-            self.model = torchvision.models.resnet50(num_classes=num_cls)
-        else:
-            raise NotImplementedError("Resnet to be implemented:", arch)
-
-    def forward(self, input_dict):
-
-        cls = self.model(input_dict["image"])
-
-        return cls
 
 def face_expression(image_path):   
     image_path = image_path
@@ -85,3 +66,23 @@ def face_expression(image_path):
         face_expressions.append(label_map[idx])
         print(face_expressions)
         return face_expressions
+        
+class ResNet(nn.Module):
+
+    def __init__(
+        self, arch, pretrained=False, progress=False, num_cls=8, **kwargs
+    ):
+        super().__init__()
+
+        if(arch == 'resnet18'):
+            self.model = torchvision.models.resnet18(num_classes=num_cls)
+        elif(arch == 'resnet50'):
+            self.model = torchvision.models.resnet50(num_classes=num_cls)
+        else:
+            raise NotImplementedError("Resnet to be implemented:", arch)
+
+    def forward(self, input_dict):
+
+        cls = self.model(input_dict["image"])
+
+        return cls
