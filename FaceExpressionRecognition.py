@@ -51,24 +51,28 @@ while True:
 
     # face recognition
     if frame_number % process_Nth_frame == 0:
-        small_framme = cv2.resize(frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
+        small_framme = cv2.resize(
+            frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
         rgb_frame = cv2.cvtColor(small_framme, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
-        print("Time Face Recognition: {:.2f}".format(time_after_face_rec - time_at_start))
+        print("Time Face Recognition: {:.2f}".format(
+            time_after_face_rec - time_at_start))
 
         # face expression recognition
         face_expressions = []
         for (top, right, bottom, left) in face_locations:
             # Magic Face Expression Recognition
-            face_image = frame[top*scale_factor:bottom*scale_factor, left*scale_factor:right*scale_factor]
+            face_image = frame[top*scale_factor:bottom *
+                               scale_factor, left*scale_factor:right*scale_factor]
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_exp = face_exp_rec.face_expression(face_image)
             face_expressions.append(face_exp)
-        
+
         time_after_expr_rec = time.time()
         if len(face_expressions) > 0:
-            print("Time Face Expression Recognition: {:.2f}".format(time_after_expr_rec - time_after_face_rec))
+            print("Time Face Expression Recognition: {:.2f}".format(
+                time_after_expr_rec - time_after_face_rec))
     else:
         cv2.waitKey(33)
 
@@ -81,17 +85,20 @@ while True:
         bottom *= scale_factor
         left *= scale_factor
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-        cv2.rectangle(frame, (left, bottom), (right, bottom + 25), (0,0,255), cv2.FILLED)
+        cv2.rectangle(frame, (left, bottom),
+                      (right, bottom + 25), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, face_expression, (left + 6, bottom + 18), font, 0.8, (255, 255, 255), 1)
+        cv2.putText(frame, face_expression, (left + 6, bottom + 18),
+                    font, 0.8, (255, 255, 255), 1)
 
     # graphical output stats
     fps = fps_constant / (start_time_current - start_time_old)
     stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
-    cv2.rectangle(frame, (0,0), (300, 25), (255,0,0), cv2.FILLED)
+    cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
     font = cv2.FONT_HERSHEY_DUPLEX
     cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
-    print("Output formatting: {:.2f}".format(time.time() - time_after_expr_rec))
+    print("Output formatting: {:.2f}".format(
+        time.time() - time_after_expr_rec))
 
     # display resulting image
     cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
