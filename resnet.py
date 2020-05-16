@@ -26,21 +26,21 @@ dictionary = {
 
 label_map = dict((v,k) for k, v in dictionary.items())
 
-def image_loader(image_name):
+def image_loader(image):
     """load image, returns cuda tensor"""
-    image = Image.open(image_name)
+    #image = Image.open(image)
     #image = cv2.resize(image, (224, 224)) 
     loader = transforms.Compose([ transforms.ToTensor()])
     image = loader(image).float()
     image = image.unsqueeze(0)  #this is for VGG, may not be needed for ResNet
     return image  #assumes that you're using GPU
 
-def crop_image(path):
-    image = cv2.imread(path)
+def crop_image(image):
     image = cv2.resize(image, (224, 224)) 
     return image
 
 def face_expression(image_path):  
+    image = cv2.imread(path)
     resnet50_model = ResNet('resnet50')
     PATH = './best.pth'
     checkpoint = torch.load(PATH)
@@ -48,8 +48,8 @@ def face_expression(image_path):
     resnet50_model.eval()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     #resnet50_model = resnet50_model.to(device)
-    image = crop_image(image_path)
-    image = image_loader(image_path)
+    image = crop_image(image)
+    image = image_loader(image)
     input_image = {"image": image}
     with torch.no_grad():
         face_expressions = []
