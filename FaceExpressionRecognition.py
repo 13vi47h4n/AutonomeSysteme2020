@@ -9,40 +9,20 @@ from TextExport import TextExport
 from Ultralight.vision.ssd.config.fd_config import define_img_size
 
 
-parser = argparse.ArgumentParser(
-    description='detect_video')
 
-parser.add_argument('--net_type', default="RFB", type=str,
-                    help='The network architecture ,optional: RFB (higher precision) or slim (faster)')
-parser.add_argument('--input_size', default=480, type=int,
-                    help='define network input size,default optional value 128/160/320/480/640/1280')
-parser.add_argument('--threshold', default=0.7, type=float,
-                    help='score threshold')
-parser.add_argument('--candidate_size', default=1000, type=int,
-                    help='nms candidate size')
-parser.add_argument('--path', default="imgs", type=str,
-                    help='imgs dir')
-parser.add_argument('--test_device', default="cuda:0", type=str,
-                    help='cuda:0 or cpu')
-parser.add_argument('--video_path', default="/home/linzai/Videos/video/16_1.MP4", type=str,
-                    help='path of video')
-args = parser.parse_args()
-
-net_type = 'RFB'
-
-test_device = args.test_device
+test_device = "cuda:0"
 
 candidate_size = 1000#args.candidate_size
 threshold = 0.7#args.threshold
 
 label_path = "./models/voc-model-labels.txt"
 
-net_type = 'RFB'
+net_type = 'slim'
 
 class_names = [name.strip() for name in open(label_path).readlines()]
 num_classes = len(class_names)
 
-input_img_size = args.input_size
+input_img_size = 480
 define_img_size(input_img_size)  # must put define_img_size() before 'import create_mb_tiny_fd, create_mb_tiny_fd_predictor'
 
 from Ultralight.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
@@ -67,7 +47,7 @@ net.load(model_path)
 # global variables
 fps_constant = 10
 process_Nth_frame = 4
-scale_factor = 1
+scale_factor = 3
 resize_factor = 1
 
 # initialize face expression recognition
@@ -106,7 +86,7 @@ while True:
     # set timers for FPS calculation
     if frame_number % fps_constant == 0:
         start_time_old = start_time_current
-        start_time_current = time.time()
+        start_time_current = time.time() + 1
 
     ret, frame = video_capture.read()
     if not ret:
@@ -157,7 +137,7 @@ while True:
                     font, 0.8, (255, 255, 255), 1)
 
     # graphical output stats
-    fps = 1#fps_constant / (start_time_current - start_time_old)
+    fps = fps_constant / (start_time_current - start_time_old)
     stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
     cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
     font = cv2.FONT_HERSHEY_DUPLEX
