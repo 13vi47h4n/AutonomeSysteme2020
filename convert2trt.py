@@ -1,6 +1,11 @@
 import torch
 from torch2trt import torch2trt
 from torchvision.models.alexnet import alexnet
+import torch.nn as nn
+import torchvision.models as models
+import torchvision.transforms as transforms
+from torchvision import datasets, models, transforms
+import cv2
 
 resnet50_model = ResNet('resnet50')
 PATH = './best.pth'
