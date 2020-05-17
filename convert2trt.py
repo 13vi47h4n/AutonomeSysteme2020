@@ -17,7 +17,7 @@ def convert():
     resnet50_model.eval()
 
     #create dummy data
-    data = torch.zeros((1, 3, 224, 224)).cuda()
+    data = torch.zeros((1, 224, 224)).cuda()
 
     # convert to TensorRT feeding sample data as input
     model_trt = torch2trt(resnet50_model, [data], fp16_mode=True)
