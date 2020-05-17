@@ -18,7 +18,7 @@ def convert():
     resnet50_model.eval()
 
     #create dummy data
-    data = np.zeros(shape[224, 224, 3], dtype=np.uint8)
+    data = np.zeros((224, 224, 3), np.uint8)
 
     loader = transforms.Compose([transforms.ToTensor()])
     data = loader(data).float()
