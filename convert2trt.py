@@ -20,7 +20,7 @@ def convert():
     data = torch.zeros((1, 3, 224, 224))
 
     # convert to TensorRT feeding sample data as input
-    model_trt = torch2trt(resnet50_model, [data], fp16_mode=true)
+    model_trt = torch2trt(resnet50_model, [data], fp16_mode=True)
 
     torch.save(model_trt.state_dict(), 'best_trt.pth')
 
