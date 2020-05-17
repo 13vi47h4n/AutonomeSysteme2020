@@ -7,20 +7,21 @@ import torchvision.transforms as transforms
 from torchvision import datasets, models, transforms
 import cv2
 
-resnet50_model = ResNet('resnet50')
-PATH = './best.pth'
-checkpoint = torch.load(PATH)
+def convert():
+    resnet50_model = ResNet('resnet50')
+    PATH = './best.pth'
+    checkpoint = torch.load(PATH)
 
-resnet50_model.load_state_dict(checkpoint['model_state_dict'])
-resnet50_model.eval()
+    resnet50_model.load_state_dict(checkpoint['model_state_dict'])
+    resnet50_model.eval()
 
-#create dummy data
-data = torch.zeros((1, 3, 224, 224))
+    #create dummy data
+    data = torch.zeros((1, 3, 224, 224))
 
-# convert to TensorRT feeding sample data as input
-model_trt = torch2trt(resnet50_model, [data], fp16_mode=true)
+    # convert to TensorRT feeding sample data as input
+    model_trt = torch2trt(resnet50_model, [data], fp16_mode=true)
 
-torch.save(model_trt.state_dict(), 'best_trt.pth')
+    torch.save(model_trt.state_dict(), 'best_trt.pth')
 
 
 class ResNet(nn.Module):
@@ -40,3 +41,6 @@ class ResNet(nn.Module):
     def forward(self, input_dict):
         cls = self.model(input_dict["image"])
         return cls
+
+if __name__ == "__main__":
+    convert()
