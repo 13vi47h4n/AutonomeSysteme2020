@@ -1,4 +1,5 @@
 import torch
+import torchvision
 from torch2trt import torch2trt
 from torchvision.models.alexnet import alexnet
 import torch.nn as nn
