@@ -1,48 +1,12 @@
 import cv2
-import argparse
+import face_recognition
 import numpy as np
 import sys
 import time
 import itertools
 from resnet import ResNetModel
 from TextExport import TextExport
-from Ultralight.vision.ssd.config.fd_config import define_img_size
-
-
-
-test_device = "cuda:0"
-
-candidate_size = 1000#args.candidate_size
-threshold = 0.7#args.threshold
-
-label_path = "./models/voc-model-labels.txt"
-
-net_type = 'slim'
-
-class_names = [name.strip() for name in open(label_path).readlines()]
-num_classes = len(class_names)
-
-input_img_size = 480
-define_img_size(input_img_size)  # must put define_img_size() before 'import create_mb_tiny_fd, create_mb_tiny_fd_predictor'
-
-from Ultralight.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
-from Ultralight.vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
-from Ultralight.vision.utils.misc import Timer
-
-if net_type == 'slim':
-    model_path = "models/pretrained/version-slim-320.pth"
-    # model_path = "models/pretrained/version-slim-640.pth"
-    net = create_mb_tiny_fd(len(class_names), is_test=True, device=test_device)
-    predictor = create_mb_tiny_fd_predictor(net, candidate_size=candidate_size, device=test_device)
-elif net_type == 'RFB':
-    model_path = "models/pretrained/version-RFB-320.pth"
-    # model_path = "models/pretrained/version-RFB-640.pth"
-    net = create_Mb_Tiny_RFB_fd(len(class_names), is_test=True, device=test_device)
-    predictor = create_Mb_Tiny_RFB_fd_predictor(net, candidate_size=candidate_size, device=test_device)
-else:
-    print("The net type is wrong!")
-    sys.exit(1)
-net.load(model_path)
+from fast_face_detection import FastFaceRecognition
 
 # global variables
 fps_constant = 10
@@ -52,6 +16,7 @@ resize_factor = 1
 
 # initialize face expression recognition
 face_exp_rec = ResNetModel(size=int(224/resize_factor), mode="gpu")
+fast_face_detection = FastFaceRecognition()
 
 # initialize logger
 if (len(sys.argv) > 2):
@@ -60,17 +25,17 @@ else:
     export = TextExport("output.yml")
 
 # init camera
-# if (len(sys.argv) > 1):
-#     video_input = sys.argv[1]
-# else:
-#     print("Kamerainput wählen (Entweder Zahl oder URL)")
-#     video_input = input()
-# try:
-#     video_input = int(video_input)
-# except:
-#     pass
+if (len(sys.argv) > 1):
+    video_input = sys.argv[1]
+else:
+    print("Kamerainput wählen (Entweder Zahl oder URL)")
+    video_input = input()
+try:
+    video_input = int(video_input)
+except:
+    pass
 
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(video_input)
 video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 # init some variables
@@ -95,29 +60,27 @@ while True:
 
     # face recognition
     if frame_number % process_Nth_frame == 0:
-        small_framme = cv2.resize(
-            frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
-        rgb_frame = cv2.cvtColor(small_framme, cv2.COLOR_BGR2RGB)
-        face_locations, labels, probs = predictor.predict(rgb_frame, candidate_size / 2, threshold)
+        small_frame = cv2.resize(frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
+        rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+        time_before = time.time()
+        face_locations1 = fast_face_detection.face_locations(rgb_frame)
+        time_after_fast = time.time()
+        face_locations2 = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
-        print("Time Face Recognition: {:.2f}".format(
-            time_after_face_rec - time_at_start))
+        print("Time comparison: Fast[{}], Before[{}]".format(time_after_fast - time_before, time_after_face_rec - time_after_fast))
+        print("Result fast: {}".format(face_locations1))
+        print("Result before: {}".format(face_locations2))
 
         # face expression recognition
         face_expressions = []
-        print(face_locations)
         for (top, left, bottom, right) in face_locations:
             # Magic Face Expression Recognition
-            face_image = frame[int(top)*scale_factor:int(bottom) *
-                               scale_factor, int(left)*scale_factor:int(right)*scale_factor]
+            face_image = frame[int(top)*scale_factor:int(bottom) * scale_factor, int(left)*scale_factor:int(right)*scale_factor]
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_exp = face_exp_rec.face_expression(face_image)
             face_expressions.append(face_exp)
 
         time_after_expr_rec = time.time()
-        if len(face_expressions) > 0:
-            print("Time Face Expression Recognition: {:.2f}".format(
-                time_after_expr_rec - time_after_face_rec))
     else:
         cv2.waitKey(33)
 
@@ -142,8 +105,6 @@ while True:
     cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
     font = cv2.FONT_HERSHEY_DUPLEX
     cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
-    print("Output formatting: {:.2f}".format(
-        time.time() - time_after_expr_rec))
 
     # display resulting image
     cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
