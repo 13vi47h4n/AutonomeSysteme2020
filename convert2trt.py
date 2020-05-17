@@ -7,6 +7,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from torchvision import datasets, models, transforms
 import cv2
+import numpy as np
 
 def convert():
     resnet50_model = ResNet('resnet50')
