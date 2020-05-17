@@ -15,7 +15,7 @@ def convert():
     checkpoint = torch.load(PATH)
 
     resnet50_model.load_state_dict(checkpoint['model_state_dict'])
-    resnet50_model.eval()
+    resnet50_model.cuda().eval()
 
     #create dummy data
     data = torch.zeros((1, 3, 224, 224)).cuda()
