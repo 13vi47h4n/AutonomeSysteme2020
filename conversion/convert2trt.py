@@ -22,7 +22,7 @@ def convert():
         print("usage: python convert2trt.py <source> <target>")
         sys.exit(-1)
 
-    resnet18_model = ResNet('resnet50')
+    resnet18_model = ResNet('resnet18')
     PATH = sys.argv[1]
     TARGET = sys.argv[2]
     checkpoint = torch.load(PATH)
@@ -33,7 +33,7 @@ def convert():
     data = torch.zeros((1, 3, 224, 224)).cuda()
 
     # convert to TensorRT feeding sample data as input
-    model_trt = torch2trt(resnet18_model, [data], fp16_mode=True)
+    model_trt = torch2trt(resnet18_model, [data])
 
     print("{}".format(model_trt(data)))
     print("{}".format(resnet18_model.(data)))
