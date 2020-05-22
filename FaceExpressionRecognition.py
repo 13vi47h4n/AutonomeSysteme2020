@@ -4,17 +4,17 @@ import numpy as np
 import sys
 import time
 import itertools
-from resnet import ResNetModel
+from resnetCompare18 import ResNetModel
 from TextExport import TextExport
 
 # global variables
 fps_constant = 10
-process_Nth_frame = 4
-scale_factor = 3
+process_Nth_frame = 1
+scale_factor = 4
 resize_factor = 1
 
 # initialize face expression recognition
-face_exp_rec = ResNetModel(size=int(224/resize_factor), mode="gpu")
+face_exp_rec = ResNetModel(size=224, mode="gpu")
 
 # initialize logger
 if (len(sys.argv) > 2):
@@ -43,6 +43,7 @@ face_expressions = []
 cropped = 0
 start_time_current = time.time()
 start_time_old = time.time()
+face_image_tmp = None
 while True:
     time_at_start = time.time()
     print("Frame: {}".format(frame_number))
@@ -52,9 +53,15 @@ while True:
         start_time_current = time.time()
 
     ret, frame = video_capture.read()
+
     if not ret:
         print("End of input")
         break
+
+    # resize frame
+    target_width = 840
+    target_height = int(frame.shape[0]*(target_width/frame.shape[1]))
+    frame = cv2.resize(frame, (target_width, target_height))
 
     # face recognition
     if frame_number % process_Nth_frame == 0:
@@ -73,6 +80,7 @@ while True:
             face_image = frame[top*scale_factor:bottom *
                                scale_factor, left*scale_factor:right*scale_factor]
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+            face_image_tmp = face_image
             face_exp = face_exp_rec.face_expression(face_image)
             face_expressions.append(face_exp)
 
@@ -110,6 +118,10 @@ while True:
     # display resulting image
     cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
     cv2.imshow('Video', frame)
+
+    cv2.namedWindow('Face', cv2.WINDOW_NORMAL)
+    if face_image_tmp is not None:
+        cv2.imshow('Face', face_image_tmp)
 
     # log when 'l' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('l'):

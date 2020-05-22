@@ -24,8 +24,8 @@ class ResNetModel:
     }
 
     def __init__(self, size=224, mode='gpu'):
-        resnet50_model = ResNet('resnet50')
-        PATH = './best.pth'
+        resnet50_model = ResNet('resnet18', num_cls=8)
+        PATH = './models/resnet18.224.pth'
         if torch.cuda.is_available() and mode == 'gpu':
             checkpoint = torch.load(PATH)
         else:
@@ -57,9 +57,8 @@ class ResNetModel:
         resized_image = self.resize_image(image)
         tensor_image = self.image_loader(resized_image)
         tensor_image = tensor_image.to(self.device)
-        input_image = {"image": tensor_image}
         with torch.no_grad():
-            outputs = self.resnet50_model.forward(input_image)
+            outputs = self.resnet50_model.forward(tensor_image)
             _, predicted = torch.max(outputs, 1)
             idx = predicted.item()
             face_expression = self.label_map[idx]
@@ -80,6 +79,6 @@ class ResNet(nn.Module):
         else:
             raise NotImplementedError("Resnet to be implemented:", arch)
 
-    def forward(self, input_dict):
-        cls = self.model(input_dict["image"])
+    def forward(self, input_image):
+        cls = self.model(input_image)
         return cls
