@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import time
 import itertools
-from resnetCompare18 import ResNetModel
+from resnetCompare import ResNetModel
 from TextExport import TextExport
 
 # global variables
