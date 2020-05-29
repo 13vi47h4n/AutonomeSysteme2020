@@ -48,7 +48,6 @@ face_expressions = []
 cropped = 0
 start_time_current = time.time()
 start_time_old = time.time()
-face_image_tmp = None
 while True:
     time_at_start = time.time()
     print("Frame: {}".format(frame_number))
@@ -80,7 +79,6 @@ while True:
             face_image = frame[top*scale_factor:bottom *
                                scale_factor, left*scale_factor:right*scale_factor]
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
-            face_image_tmp = face_image
             face_exp = face_exp_rec.face_expression(face_image)
             face_expressions.append(face_exp)
 
@@ -118,10 +116,6 @@ while True:
     # display resulting image
     cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
     cv2.imshow('Video', frame)
-
-    cv2.namedWindow('Face', cv2.WINDOW_NORMAL)
-    if face_image_tmp is not None:
-        cv2.imshow('Face', face_image_tmp)
 
     # log when 'l' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('l'):

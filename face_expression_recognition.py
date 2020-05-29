@@ -47,11 +47,10 @@ class TRTModel:
     def face_expression(self, image):
         resized_image = self.resize_image(image)
         tensor_image = self.image_loader(resized_image)
-        tensor_image = tensor_image.cuda()
+        tensor_image = tensor_image.cuda().contiguous()
         with torch.no_grad():
             outputs = self.model_trt(tensor_image)
             _, predicted = torch.max(outputs, 1)
-            print("{}".format(outputs))
             idx = predicted.item()
             face_expression = self.label_map[idx]
             return face_expression
