@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import time
 import itertools
-from trt import TRTModel
+from face_expression_recognition import TRTModel
 from TextExport import TextExport
 
 # global variables
