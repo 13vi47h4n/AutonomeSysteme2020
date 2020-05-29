@@ -8,7 +8,7 @@ from face_expression_recognition import TRTModel
 from text_export import TextExport
 import yaml
 
-with (open("config.yml"), "r") as ymlfile:
+with open("config.yml", "r") as ymlfile:
     cfg = yaml.full_load(ymlfile)
 
 # global variables
