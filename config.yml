@@ -2,4 +2,4 @@ fps_constant: 10
 process_nth_frame: 3
 scale_factor: 2
 use_target_size: false
-target_size: 1000
+target_width: 1000

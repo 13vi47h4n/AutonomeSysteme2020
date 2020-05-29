@@ -15,7 +15,7 @@ with open("config.yml", "r") as ymlfile:
 fps_constant = int(cfg["fps_constant"])
 process_Nth_frame = int(cfg["process_nth_frame"])
 scale_factor = int(cfg["scale_factor"])
-resize_factor = int(cfg["target_size"])
+target_width = int(cfg["target_width"])
 resize_input = cfg["use_target_size"] == "true"
 
 # initialize face expression recognition
@@ -61,6 +61,12 @@ while True:
     if not ret:
         print("End of input")
         break
+    
+    # resize input
+    if resize_input:
+        h, w, _ = frame.shape
+        target_height = target_width/w*h
+        frame = cv2.resize(frame, (target_width, target_height))
 
     # face recognition
     if frame_number % process_Nth_frame == 0:
