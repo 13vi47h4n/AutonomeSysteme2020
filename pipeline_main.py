@@ -5,7 +5,7 @@ import sys
 import time
 import itertools
 from face_expression_recognition import TRTModel
-from TextExport import TextExport
+from text_export import TextExport
 
 # global variables
 fps_constant = 10
