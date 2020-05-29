@@ -10,4 +10,4 @@ settings.json
 .vscode/
 
 # log output
-*.yml
+output.yml

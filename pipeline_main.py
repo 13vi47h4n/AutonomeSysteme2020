@@ -6,12 +6,17 @@ import time
 import itertools
 from face_expression_recognition import TRTModel
 from text_export import TextExport
+import yaml
+
+with (open("config.yml"), "r") as ymlfile:
+    cfg = yaml.full_load(ymlfile)
 
 # global variables
-fps_constant = 10
-process_Nth_frame = 1
-scale_factor = 3
-resize_factor = 1
+fps_constant = int(cfg["fps_constant"])
+process_Nth_frame = int(cfg["process_nth_frame"])
+scale_factor = int(cfg["scale_factor"])
+resize_factor = int(cfg["target_size"])
+resize_input = cfg["use_target_size"] == "true"
 
 # initialize face expression recognition
 face_exp_rec = TRTModel()
