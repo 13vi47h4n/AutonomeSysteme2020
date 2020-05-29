@@ -4,17 +4,17 @@ import numpy as np
 import sys
 import time
 import itertools
-from resnetCompare import ResNetModel
+from trt import TRTModel
 from TextExport import TextExport
 
 # global variables
 fps_constant = 10
 process_Nth_frame = 1
-scale_factor = 4
+scale_factor = 3
 resize_factor = 1
 
 # initialize face expression recognition
-face_exp_rec = ResNetModel(size=224, mode="gpu")
+face_exp_rec = TRTModel()
 
 # initialize logger
 if (len(sys.argv) > 2):
@@ -58,11 +58,6 @@ while True:
         print("End of input")
         break
 
-    # resize frame
-    target_width = 840
-    target_height = int(frame.shape[0]*(target_width/frame.shape[1]))
-    frame = cv2.resize(frame, (target_width, target_height))
-
     # face recognition
     if frame_number % process_Nth_frame == 0:
         small_framme = cv2.resize(
@@ -82,6 +77,7 @@ while True:
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_image_tmp = face_image
             face_exp = face_exp_rec.face_expression(face_image)
+            print("torch: {} | trt: {}".format(face_exp2, face_exp))
             face_expressions.append(face_exp)
 
         time_after_expr_rec = time.time()
