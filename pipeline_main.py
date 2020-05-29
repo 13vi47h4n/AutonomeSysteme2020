@@ -77,7 +77,6 @@ while True:
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_image_tmp = face_image
             face_exp = face_exp_rec.face_expression(face_image)
-            print("torch: {} | trt: {}".format(face_exp2, face_exp))
             face_expressions.append(face_exp)
 
         time_after_expr_rec = time.time()
