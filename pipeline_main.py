@@ -19,7 +19,9 @@ target_width = int(cfg["target_width"])
 resize_input = cfg["use_target_size"] == "true"
 
 # initialize face expression recognition
+print("Initializing Model...")
 face_exp_rec = TRTModel()
+print("Done.")
 
 # initialize logger
 if (len(sys.argv) > 2):
